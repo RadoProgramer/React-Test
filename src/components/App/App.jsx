@@ -1,11 +1,59 @@
-import React from 'react';
-import Feedback from '../Feedback/Feedback';
+import React, { Suspense, lazy, useEffect } from "react";
+import {
+  Routes,
+  Route,
+  Navigate,
+  NavLink,
+  useLocation,
+} from "react-router-dom";
+import "./App.css";
+
+const Home = lazy(() => import("../Home/Home.jsx"));
+const Movies = lazy(() => import("../Movies/Movies.jsx"));
+const MovieDetails = lazy(() => import("../MovieDetails/MovieDetails.jsx"));
+const Cast = lazy(() => import("../Cast/Cast.jsx"));
+const Reviews = lazy(() => import("../Reviews/Reviews.jsx"));
+const NotFound = lazy(() => import("../NotFound/NotFound.jsx"));
 
 function App() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (
+      !location.pathname.includes("cast") &&
+      !location.pathname.includes("reviews")
+    ) {
+      window.scrollTo(0, 0);
+    }
+  }, [location.pathname]);
+
   return (
-    <>
-      <Feedback />
-    </>
+    <div>
+      <nav>
+        <NavLink
+          to="/"
+          end
+          className={({ isActive }) => (isActive ? "active" : "")}>
+          Home
+        </NavLink>
+        <NavLink
+          to="/movies"
+          className={({ isActive }) => (isActive ? "active" : "")}>
+          Movies
+        </NavLink>
+      </nav>
+      <Suspense fallback={<div>Loading...</div>}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/movies" element={<Movies />} />
+          <Route path="/movies/:movieId" element={<MovieDetails />}>
+            <Route path="cast" element={<Cast />} />
+            <Route path="reviews" element={<Reviews />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </Suspense>
+    </div>
   );
 }
 
